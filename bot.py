@@ -1,5 +1,5 @@
 import re
-from sqlnewnote import newtablenote
+from sqlcommands import newtablenote, delsqluser, showsqluser
 import logging
 import config
 from config import host, user, password, db_name
@@ -24,6 +24,7 @@ async def cmd_test1(message: types.Message):
     else:
         if (re.search('Ключ ".*" уже существует', str(answer[1]))):
             await  message.answer ("Вы уже были зарегистрированы")
+
 
 
 
