@@ -30,4 +30,4 @@ def newtablenote(column, value):
          cursor.close()
          print("[INFO] PostgreSQL connection closed")
     return answer
-    #penis
+    
