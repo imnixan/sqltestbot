@@ -1,7 +1,6 @@
 import psycopg2
 from config import host, user, password, db_name
-def newtablenote(column, value): #добавление записи в юзера
-    print("добавляю запись")
+def register(id, date, zz): #добавление юзера в базу по телеграм айди
     try:
         
         connection = psycopg2.connect(
@@ -16,7 +15,7 @@ def newtablenote(column, value): #добавление записи в юзер�
         
         with connection.cursor() as cursor:
             cursor.execute(
-            """INSERT INTO testbase (""" + column + """) VALUES ('""" + value + """');"""
+            """INSERT INTO testbase (telegramid, birth, sign) VALUES ('""" + id + """', '"""+ date + """', '"""+ zz + """');"""
             )
         answer = ["Успешно", 1]
         print ('connect and ask ok')
@@ -42,12 +41,41 @@ def showsqluser (column, value):
         connection.autocommit = True
 
         with connection.cursor() as cursor:
-            cursor.execute("Select name, birth, sex, description, photo, find from testbase where " + column + " = '" + value + "';")
-            answer = ["Успешно", cursor.fetchone()]
-            print (cursor.fetchone())
+            cursor.execute("Select * from testbase where " + column + " = '" + value + "';")
+            if (cursor.fetchone() != None):
+                answer = ["Успешно", cursor.fetchone()]
+            else: 
+                answer = ["Неуспешно", "Нет данных"]
+
         
     except Exception as _ex:
         answer = ["Неуспешно", _ex]
+    
+    finally:
+        if connection:
+            connection.close()
+    return(answer)
+
+
+def delsqluser (column, value):
+    try: 
+        connection = psycopg2.connect(
+        host=host,
+        user=user,
+        password=password,
+        database=db_name    
+    )
+        connection.autocommit = True
+        print("зашел в функцию")
+        with connection.cursor() as cursor:
+            cursor.execute("Delete from testbase where " + column + " = '" + value + "';")
+            answer = "Успешно"
+            print('удалил')
+            
+        
+    except Exception as _ex:
+        answer = "Неуспешно"
+        print(_ex)
     
     finally:
         if connection:
