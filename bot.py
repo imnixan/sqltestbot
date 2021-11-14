@@ -88,8 +88,12 @@ async def datebirth(message: types.Message,  state: FSMContext):
         if (month < 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
 
             if ( datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day)) > 16):
-                sqlcommands.register(str(message.from_user.id), message.text)
-                await message.answer("вы успешно зарегистрированы")
+                sign = zsign(message.text)
+                sqlcommands.register(str(message.from_user.id), message.text, sign)
+                
+                await message.answer(f"""Отлично.
+                Тебе {datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day))} лет
+                Твой знак зодиака {sign}""")
             else: 
                 await message.answer("К сожалению, наш сервис доступен только для лиц старше 16 лет")
                 await state.finish()
