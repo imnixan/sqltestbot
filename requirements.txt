@@ -1,3 +1,4 @@
 pyowm
 aiogram
 psycopg2
+telebot
