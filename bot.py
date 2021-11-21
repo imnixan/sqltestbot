@@ -16,7 +16,7 @@ from datetime import datetime
 import asyncio
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from zsign import zsign, zsignmatch
-from registration import registration
+
 
 
 class BotState(StatesGroup):
