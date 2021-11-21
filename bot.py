@@ -31,7 +31,10 @@ class BotState(StatesGroup):
     newphoto = State()
     newbirth = State()
     registrationcheck = State()
-
+    regname = State()
+    regsex = State()
+    regfind = State()
+    regcity = State()
 
 def botcommands(dp: Dispatcher):
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newphoto)
@@ -56,11 +59,17 @@ def botcommands(dp: Dispatcher):
     dp.register_message_handler(checkfind, state=BotState.newfind)
     dp.register_message_handler(checkage, state=BotState.newage)
     dp.register_message_handler(checkcity, state=BotState.newcity)
+
+    dp.register_message_handler(checkname, state=BotState.regname)
+    dp.register_message_handler(checksex, state=BotState.regsex)
+    dp.register_message_handler(checkfind, state=BotState.regfind)
+    dp.register_message_handler(checkcity, state=BotState.regcity)
+
     dp.register_message_handler(checkdescription, state=BotState.newdescription)
     dp.register_message_handler(checkbirth, state=BotState.newbirth)
+    dp.register_message_handler(checkphoto, content_types = ['text', 'photo'], state=BotState.newphoto)
     dp.register_message_handler(myprofile, Text(equals="показать мой профиль", ignore_case=True), state=BotState.edit_profile)
     dp.register_message_handler(myprofile, Text(equals="моя анкета", ignore_case=True), state=BotState.logged)
-    dp.register_message_handler(checkphoto, content_types = ['text', 'photo'], state=BotState.newphoto)
     dp.register_message_handler(cmd_start,  state ="*")
  
     
@@ -68,6 +77,8 @@ def botcommands(dp: Dispatcher):
 
 
 #Блок с функциями
+
+
 
 async def editphoto(message: types.Message,  state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -243,6 +254,8 @@ async def checkname(message: types.Message, state: FSMContext):
     await message.answer(f"Твое новое имя: {message.text}", reply_markup=keyboard)
     await BotState.edit_profile.set()
 
+# async def blockmenu (state, textmessage, userid):
+#     pass
 
 
 
