@@ -15,7 +15,8 @@ import acmd
 from datetime import datetime
 import asyncio
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from zsign import zsign
+from zsign import zsign, zsignmatch
+from registration import registration
 
 
 class BotState(StatesGroup):
@@ -30,13 +31,25 @@ class BotState(StatesGroup):
     newdescription = State()
     newphoto = State()
     newbirth = State()
-    registrationcheck = State()
-    regname = State()
-    regsex = State()
-    regfind = State()
-    regcity = State()
+    regnewname = State()
+    regnewsex = State()
+    regnewfind = State()
+    regnewage = State()
+    regnewcity = State()
+    regnewdescription = State()
+    regnewphoto = State()
+    regnewbirth = State()
+      
 
 def botcommands(dp: Dispatcher):
+    dp.register_message_handler(regcheckname, state=BotState.regnewname)
+    dp.register_message_handler(regchecksex, state=BotState.regnewsex)
+    dp.register_message_handler(regcheckfind, state=BotState.regnewfind)
+    dp.register_message_handler(regcheckage, state=BotState.regnewage)
+    dp.register_message_handler(regcheckcity, state=BotState.regnewcity)
+    dp.register_message_handler(regcheckdescription, state=BotState.regnewdescription)
+    dp.register_message_handler(regcheckbirth, state=BotState.regnewbirth)
+    dp.register_message_handler(regcheckphoto, content_types = ['text', 'photo'], state=BotState.regnewphoto)
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newphoto)
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newname)
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newsex)
@@ -45,7 +58,6 @@ def botcommands(dp: Dispatcher):
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newcity)
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newdescription)
     dp.register_message_handler(cancel, Text(equals="отмена", ignore_case=True), state=BotState.newbirth)
-    dp.register_message_handler(datebirth, state=BotState.waiting_for_birth)
     dp.register_message_handler(editbirth, Text(equals="дата рождения", ignore_case=True), state=BotState.edit_profile)
     dp.register_message_handler(editname, Text(equals="имя", ignore_case=True), state=BotState.edit_profile)
     dp.register_message_handler(editsex, Text(equals="пол", ignore_case=True), state=BotState.edit_profile)
@@ -59,12 +71,6 @@ def botcommands(dp: Dispatcher):
     dp.register_message_handler(checkfind, state=BotState.newfind)
     dp.register_message_handler(checkage, state=BotState.newage)
     dp.register_message_handler(checkcity, state=BotState.newcity)
-
-    dp.register_message_handler(checkname, state=BotState.regname)
-    dp.register_message_handler(checksex, state=BotState.regsex)
-    dp.register_message_handler(checkfind, state=BotState.regfind)
-    dp.register_message_handler(checkcity, state=BotState.regcity)
-
     dp.register_message_handler(checkdescription, state=BotState.newdescription)
     dp.register_message_handler(checkbirth, state=BotState.newbirth)
     dp.register_message_handler(checkphoto, content_types = ['text', 'photo'], state=BotState.newphoto)
@@ -272,53 +278,21 @@ async def cmd_start(message: types.Message,  state: FSMContext):
             await message.answer("Главная страница", reply_markup=keyboard)
             await BotState.logged.set() 
         else:
-            await message.answer("Приветствую! Укажи свою дату рождения в формате ДД.ММ.ГГГГ", reply_markup=types.ReplyKeyboardRemove())
-            await BotState.waiting_for_birth.set()
+            await BotState.regnewname.set()
+            await message.answer("Привет! Давай зарегистрируемся. Для начала введи свое имя", reply_markup=types.ReplyKeyboardRemove())
+
     else:
         return
+
+
+
+
 async def cancel(message:types.Message, state:FSMContext):
     await BotState.edit_profile.set()
     await myprofile(message, FSMContext)
     return
 
-#Проверка введенной даты возраста
-async def datebirth(message: types.Message,  state: FSMContext):
-    if (re.match('\d\d\.\d\d\.\d\d\d\d', message.text)):
-        day = int(message.text.split(".")[0])
-        month = int(message.text.split(".")[1])
-        year = int(message.text.split(".")[2])
-        md = {1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7:31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
-        if year % 4 == 0 and year % 100 != 0 or year % 400 == 0:
-            md[2] = 29
 
-        if (month < 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
-
-            if ( datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day)) > 16):
-                sign = zsign(message.text)
-                sqlcommands.register(str(message.from_user.id), message.text, sign)
-                
-                keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                buttons = ["Пол", "Кого я ищу", "Возраст поиска", "Город поиска", "Подпись", "Фото"]
-                keyboard.add(*buttons)
-                profile = "Моя анкета"
-                back = "На главную"
-                keyboard.add(profile)
-                keyboard.add(back)
-                await message.answer(f"""Отлично.
-Твой возраст: {datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day))} лет
-Твой знак зодиака: {sign}
-Перейдем к заполнению анкеты?""", reply_markup=keyboard)
-                
-                await BotState.edit_profile.set()
-
-            else: 
-                await message.answer("К сожалению, наш сервис доступен только для лиц старше 16 лет")
-                await state.finish()
-        else: 
-            await message.answer("Указана несуществующая дата, попробуй еще раз")    
-    else:
-        await message.answer("""Дата рождения указана некорректно. Пожалуйста, укажи ее в формате дд.мм.гггг 
-Например: 31.12.2001""")   
 
 async def myprofile(message: types.Message,  state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -345,6 +319,7 @@ async def myprofile(message: types.Message,  state: FSMContext):
 Дата рождения: {sqlcommands.showsqluservalue('birth', str(message.from_user.id))}
 Пол: {sqlcommands.showsqluservalue('sex', str(message.from_user.id))}
 Знак зодиака: {sqlcommands.showsqluservalue('sign', str(message.from_user.id))}
+Подходящие мне знаки: {zsignmatch[sqlcommands.showsqluservalue('sign', str(message.from_user.id))]}
 Кого я ищу: {sqlcommands.showsqluservalue('find', str(message.from_user.id))}
 Возраст поиска: {sqlcommands.showsqluservalue('agemin', str(message.from_user.id))} - {sqlcommands.showsqluservalue('agemax', str(message.from_user.id))}
 Город: {sqlcommands.showsqluservalue('city', str(message.from_user.id))}
@@ -397,6 +372,124 @@ async def checkbirth (message: types.Message,  state: FSMContext):
     else:
         await message.answer("""Дата рождения указана некорректно. Пожалуйста, укажи ее в формате дд.мм.гггг 
 Например: 31.12.2001""")   
+
+
+#Регистрация 
+
+
+async def regcheckname(message: types.Message, state: FSMContext):        
+    global regname
+    regname = message.text
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    buttons = ['Мужской', "Женский"]
+    keyboard.add(*buttons)
+    
+    await message.answer("Выбери свой пол", reply_markup=keyboard)
+    await BotState.regnewsex.set()
+
+async def regchecksex(message: types.Message, state: FSMContext):
+
+    if message.text == 'Мужской' or message.text == 'Женский':
+        global regsex
+        regsex = message.text.lower()
+        await message.answer("Укажи свою дату рождения в формате ДД.ММ.ГГГГ", reply_markup=types.ReplyKeyboardRemove())
+        await BotState.regnewbirth.set()
+
+async def regcheckbirth (message: types.Message,  state: FSMContext):
+
+    if (re.match('\d\d\.\d\d\.\d\d\d\d', message.text)):
+        day = int(message.text.split(".")[0])
+        month = int(message.text.split(".")[1])
+        year = int(message.text.split(".")[2])
+        md = {1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7:31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
+        if year % 4 == 0 and year % 100 != 0 or year % 400 == 0:
+            md[2] = 29
+
+        if (month < 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
+
+            if ( datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day)) > 16):
+                global regsign, regbirth
+                regsign = zsign(message.text)
+                regbirth = message.text
+                keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                buttons = ['Мужчину', "Женщину"]
+                keyboard.add(*buttons)
+                    
+                
+                await message.answer(f"""Твой возраст: {datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day))} лет
+Знак зодиака: {regsign}""", reply_markup=keyboard)
+                await message.answer('Кого будешь искать?')
+                await BotState.regnewfind.set()
+
+            else: 
+                await message.answer("К сожалению, наш сервис доступен только для лиц старше 16 лет")
+                await State.finish()
+        else: 
+            await message.answer("Указана несуществующая дата, попробуй еще раз")    
+    else:
+        await message.answer("""Дата рождения указана некорректно. Пожалуйста, укажи ее в формате дд.мм.гггг 
+Например: 31.12.2001""")
+
+async def regcheckfind(message: types.Message, state: FSMContext):
+
+
+    if message.text == 'Мужчину' or message.text == 'Женщину':
+        global regfind
+        regfind = message.text.lower()
+        await message.answer("В каком диапазоне по возрасту будем искать? Укажи в формате минимальный возраст-максимальный возраст, например 18-20", reply_markup=types.ReplyKeyboardRemove())
+        await BotState.regnewage.set()
+
+async def regcheckage(message: types.Message, state: FSMContext):
+    
+    agemin = int(re.search("\d\d(?=\-)", message.text).group(0))
+    agemax = int(re.search("(?<=\-)\d\d", message.text).group(0))
+        
+    if (agemin > 16 and agemax > 16 and agemin <= agemax):
+
+        global regagemax, regagemin
+        regagemax = agemax
+        regagemin = agemin       
+        await message.answer("В каком городе будем искать?", reply_markup=types.ReplyKeyboardRemove())
+        await BotState.regnewcity.set()
+    else:
+        await message.answer("Проверь, что минимальный возраст не больше максимального и больше 16")
+
+
+
+async def regcheckcity(message: types.Message, state: FSMContext):
+    if message.text.lower() not in cities_list:
+        await message.answer("К сожалению, такого города не существует или он находится не в России")
+        return
+    global regcity
+    regcity = message.text.lower()
+    await message.answer("Расскажи о себе. Это будет описанием твоего профиля для других участников")
+    await BotState.regnewdescription.set()
+
+async def regcheckdescription(message: types.Message, state: FSMContext):
+
+    global regdescription
+    regdescription = message.text
+    await message.answer("Почти готово. Теперь давай прикрепим к твоему профилю фотографию. Пришли свое фото", reply_markup=types.ReplyKeyboardRemove())
+    await BotState.regnewphoto.set()
+
+async def regcheckphoto(message: types.Message, state:FSMContext):
+
+    if ('photo' in message.content_type):
+        global regphoto
+        regphoto = message.photo[-1].file_id
+            
+        answer = sqlcommands.register(regname, regbirth, regsex, regdescription, regphoto, str(message.from_user.id), regfind, regsign, regcity, str(regagemax), str(regagemin))
+        if answer[0] == "Успешно":
+            keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            back = "Моя анкета"
+            keyboard.add(back)
+            await message.answer("Успешно зарегистрирован", reply_markup=keyboard)
+            await BotState.logged.set() 
+            
+    else:
+        await message.answer("Пришли фото")
+
+
 
 
 

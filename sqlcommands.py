@@ -1,6 +1,6 @@
 import psycopg2
 from config import host, user, password, db_name
-def register(id, date, zz): #добавление юзера в базу по телеграм айди
+def register(name, birth, sex, description, photo, id, find, sign, city, agemax, agemin ): #добавление юзера в базу по телеграм айди
     try:
         
         connection = psycopg2.connect(
@@ -15,7 +15,7 @@ def register(id, date, zz): #добавление юзера в базу по т
         
         with connection.cursor() as cursor:
             cursor.execute(
-            """INSERT INTO testbase (telegramid, birth, sign) VALUES ('""" + id + """', '"""+ date + """', '"""+ zz + """');"""
+            """INSERT INTO testbase (name, birth, sex, description, photo, telegramid, find, sign, city, agemax, agemin) VALUES ('""" + name + """', '"""+ birth + """', '"""+ sex + """', '""" + description + """', '""" + photo + """', '""" + id + """', '""" + find + """', '""" + sign + """', '""" + city + """', '""" + agemax + """', '""" + agemin + """');"""
             )
         answer = ["Успешно", 1]
         print ('connect and ask ok')
