@@ -11,3 +11,4 @@ def deluser(message):
     if (answer == "Успешно"):
         result ="Пользователь удален"
     return result
+    #####

@@ -256,7 +256,7 @@ async def checkname(message: types.Message, state: FSMContext):
 
 # async def blockmenu (state, textmessage, userid):
 #     pass
-
+#aaaaaaa
 
 
 #Когда тыкаешь начать
