@@ -1,8 +1,7 @@
-bot.py
-acmd.py
-cities.py
-config.py
-sqlask.py
-sqlcommands.py
-test.py
-zsign.py
+pyowm
+re
+logging
+asyncio
+datetime
+aiogram
+psycopg2
