@@ -347,7 +347,7 @@ async def checkbirth (message: types.Message,  state: FSMContext):
         if year % 4 == 0 and year % 100 != 0 or year % 400 == 0:
             md[2] = 29
 
-        if (month < 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
+        if (month <= 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
 
             if ( datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day)) > 16):
                 sign = zsign(message.text)
@@ -405,7 +405,7 @@ async def regcheckbirth (message: types.Message,  state: FSMContext):
         if year % 4 == 0 and year % 100 != 0 or year % 400 == 0:
             md[2] = 29
 
-        if (month < 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
+        if (month <= 12 and month > 0) and (year > 1900 and year < datetime.today().year) and (day <= md[month]):
 
             if ( datetime.today().year - year - ((datetime.today().month, datetime.today().day) < (month, day)) > 16):
                 global regsign, regbirth
