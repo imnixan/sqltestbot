@@ -15,7 +15,7 @@ def register(id, date, zz): #добавление юзера в базу по т
         
         with connection.cursor() as cursor:
             cursor.execute(
-            """INSERT INTO testbase (telegramid, birth, sign) VALUES ('""" + id + """', '"""+ date + """', '"""+ zz + """');"""
+            """INSERT INTO zodiacusers (telegramid, birth, sign) VALUES ('""" + id + """', '"""+ date + """', '"""+ zz + """');"""
             )
         answer = ["Успешно", 1]
         print ('connect and ask ok')
@@ -41,7 +41,7 @@ def showsqluser (column, value):
         connection.autocommit = True
 
         with connection.cursor() as cursor:
-            cursor.execute("Select * from testbase where " + column + " = '" + value + "';")
+            cursor.execute("Select * from zodiacusers where " + column + " = '" + value + "';")
             if (cursor.fetchone() != None):
                 answer = ["Успешно", cursor.fetchone()]
             else: 
@@ -67,7 +67,7 @@ def showsqluservalue (column, userid):
         connection.autocommit = True
 
         with connection.cursor() as cursor:
-            cursor.execute("Select " + column + " from testbase where telegramid = '" + userid + "';")
+            cursor.execute("Select " + column + " from zodiacusers where telegramid = '" + userid + "';")
             answer = str(cursor.fetchone()[0])
             if answer == "None":
                 answer = "не заполнено"
@@ -94,7 +94,7 @@ def delsqluser (column, value):
         connection.autocommit = True
         
         with connection.cursor() as cursor:
-            cursor.execute("Delete from testbase where " + column + " = '" + value + "';")
+            cursor.execute("Delete from zodiacusers where " + column + " = '" + value + "';")
             answer = "Успешно"
             print('удалил')
             
@@ -119,7 +119,7 @@ def updatesqluser (column, value, userid):
         connection.autocommit = True
         
         with connection.cursor() as cursor:
-            cursor.execute("update testbase set " + column + " = '" + value + "' where telegramid = '"+ userid + "';")
+            cursor.execute("update zodiacusers set " + column + " = '" + value + "' where telegramid = '"+ userid + "';")
             answer = "Успешно"
             
             
